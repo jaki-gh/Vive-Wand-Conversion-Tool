@@ -16,9 +16,13 @@ import threading
 import tkinter as tk
 from pathlib import Path
 from tkinter import filedialog, messagebox, scrolledtext, Tk
+from ctypes import windll
+
+# Allow high-res window
+windll.shcore.SetProcessDpiAwareness(1)
 
 
-# ── Palette & fonts ───────────────────────────────────────────────────────────
+# Palette & fonts
 
 BG       = "#000000"
 SURFACE  = "#161920"
@@ -277,7 +281,7 @@ class App(tk.Tk):
     def _set_status(self, msg: str):
         self.status.set(msg)
 
-    # ── Input validation ──────────────────────────────────────────────────────
+    # Input validation
     def _get_lh(self) -> Path | None:
         p = self.lh_path.get().strip()
         if not p or not Path(p).exists():
@@ -297,7 +301,7 @@ class App(tk.Tk):
             return None
         return s
 
-    # ── Auto-detection: exe ───────────────────────────────────────────────────
+    # Auto-detection: exe
     def _try_autodetect_lh(self):
         found = find_lh_exe()
         if found:
@@ -306,7 +310,7 @@ class App(tk.Tk):
             self._log(f"  {found}", "ok")
 
     def _auto_detect_lh(self):
-        """Button handler — re-run exe detection and report result."""
+        """Button handler; re-run exe detection and report result."""
         self._set_status("Searching for lighthouse_console.exe…")
         found = find_lh_exe()
         if found:
@@ -321,7 +325,7 @@ class App(tk.Tk):
                 "Use 'Browse…' to locate it manually.",
                 "warn"
             )
-            self._set_status("Auto-detect failed — use Browse.")
+            self._set_status("Auto-detect failed: use Browse.")
 
     def _browse_lh(self):
         path = filedialog.askopenfilename(
@@ -332,7 +336,7 @@ class App(tk.Tk):
             self.lh_path.set(path)
             self._log(f"Selected: {path}", "info")
 
-    # ── Auto-detection: serial ────────────────────────────────────────────────
+    # Auto-detection: serial
     def _auto_detect_serial(self):
         lh = self._get_lh()
         if not lh:
@@ -352,11 +356,11 @@ class App(tk.Tk):
                     "Make sure the Wand is connected over USB and SteamVR is closed.",
                     "warn"
                 )
-                self._set_status("Detection failed — enter serial manually.")
+                self._set_status("Detection failed: enter serial manually.")
 
         threading.Thread(target=_run, daemon=True).start()
 
-    # ── HMD safety check ──────────────────────────────────────────────────────
+    # HMD safety check
     def _check_not_hmd(self, config: dict, serial: str) -> bool:
         """
         Returns True if it is safe to proceed (not an HMD).
@@ -364,7 +368,7 @@ class App(tk.Tk):
         """
         if is_hmd(config):
             messagebox.showerror(
-                "⚠ Headset detected — operation aborted",
+                "⚠ Headset detected: operation aborted",
                 f"The device {serial} appears to be a VR headset (HMD), not a Wand.\n\n"
                 "Flashing a headset with this tool will BRICK it.\n\n"
                 "Make sure:\n"
@@ -373,7 +377,7 @@ class App(tk.Tk):
                 "The operation has been cancelled."
             )
             self._log(
-                f"ABORTED — {serial} looks like an HMD ("
+                f"ABORTED: {serial} looks like an HMD ("
                 f"class='{config.get('device_class', '?')}').",
                 "err"
             )
@@ -406,10 +410,10 @@ class App(tk.Tk):
         lh_patched   = lh.parent / f"{serial}.json"
 
         # Download
-        self._log_section("STEP 1 — Download original config")
+        self._log_section("STEP 1: Download original config")
         if backup_path.exists():
             self._log(f"Backup already exists: configs/{serial}/{backup_path.name}", "warn")
-            self._log("Skipping download — using existing backup.", "dim")
+            self._log("Skipping download: using existing backup.", "dim")
         else:
             self._log(f"Running: downloadconfig {lh_backup.name}", "dim")
             try:
@@ -438,11 +442,11 @@ class App(tk.Tk):
             return
 
         if not self._check_not_hmd(original, serial):
-            self._set_status("Aborted — HMD detected.")
+            self._set_status("Aborted: HMD detected.")
             return
 
         # Patch
-        self._log_section("STEP 2 — Patch config")
+        self._log_section("STEP 2: Patch config")
         patched = patch_config(original)
         changed = {k: (original.get(k), patched.get(k))
                    for k in patched if original.get(k) != patched.get(k)}
@@ -462,7 +466,7 @@ class App(tk.Tk):
             return
 
         # Upload
-        self._log_section("STEP 3 — Upload patched config")
+        self._log_section("STEP 3: Upload patched config")
         self._log(f"Running: uploadconfig {lh_patched.name}", "dim")
         try:
             run_lh(lh, [f"uploadconfig {lh_patched.name}"])
@@ -510,7 +514,7 @@ class App(tk.Tk):
                     filetypes=[("JSON files", "*.json"), ("All files", "*.*")]
                 )
                 if not chosen:
-                    self._log("Restore cancelled — no backup file selected.", "warn")
+                    self._log("Restore cancelled: no backup file selected.", "warn")
                     return
                 backup_path = Path(chosen)
 
@@ -531,7 +535,7 @@ class App(tk.Tk):
         restore_store = cfg_dir_path / f"{serial}-controller.json"
 
         # Load backup
-        self._log_section("STEP 1 — Read backup")
+        self._log_section("STEP 1: Read backup")
         try:
             with open(backup_path, "r", encoding="utf-8") as f:
                 backup = json.load(f)
@@ -541,11 +545,11 @@ class App(tk.Tk):
             return
 
         if not self._check_not_hmd(backup, serial):
-            self._set_status("Aborted — HMD detected.")
+            self._set_status("Aborted: HMD detected.")
             return
 
         # Build restore config
-        self._log_section("STEP 2 — Build restore config")
+        self._log_section("STEP 2: Build restore config")
         restored = restore_config(backup)
         changed = {
             k: (backup.get(k), restored.get(k))
@@ -572,7 +576,7 @@ class App(tk.Tk):
             return
 
         # Upload
-        self._log_section("STEP 3 — Upload restore config")
+        self._log_section("STEP 3: Upload restore config")
         self._log(f"Running: uploadconfig {lh_restore.name}", "dim")
         try:
             run_lh(lh, [f"uploadconfig {lh_restore.name}"])
@@ -581,7 +585,7 @@ class App(tk.Tk):
             return
 
         self._log_section("DONE")
-        self._log("✔ Restore complete — Wand is a Controller again.", "ok")
+        self._log("✔ Restore complete: Wand is a Controller again.", "ok")
         self._log(
             f"Configs saved to: configs/{serial}/\n\n"
             "Next steps:\n"
@@ -602,7 +606,7 @@ class App(tk.Tk):
                 fn(*args)
             except Exception as e:
                 self._log(f"Unexpected error: {e}", "err")
-                self._set_status("Error — see log.")
+                self._set_status("Error: see log.")
             finally:
                 self._busy = False
 
