@@ -5,6 +5,8 @@
 # About
 **This GUI tool written in Python converts HTC Vive Wand controllers into Vive Trackers for full body tracking! Previously, users had to use command line tools deep within SteamVR's files and edit json files by hand, but this app makes it easy as clicking a few buttons!**
 
+### Official guide for making Vive wands into trackers available at https://www.xrstudios.me/guides/vtl2
+
 ## Features
 
 - HMD checking to prevent accidental headset bricking
