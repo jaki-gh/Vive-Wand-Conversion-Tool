@@ -1,3 +1,5 @@
+<img width="100" height="100" alt="Untitled design" src="https://github.com/user-attachments/assets/99d52246-7d50-41bc-a423-b4ff5c9f964f" />
+
 # About
 **This GUI tool written in Python converts HTC Vive Wand controllers into Vive Trackers for full body tracking! Previously, users had to use command line tools deep within SteamVR's files and edit json files by hand, but this app makes it easy as clicking a few buttons!**
 
