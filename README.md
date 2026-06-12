@@ -42,7 +42,8 @@ If you want to return your controller to its original controller self, all you n
 
 All the generated json config files are stored in a folder called `configs` in the same directory as `lighthouse_console.exe`.
 
-
+## Credit
+Thanks to Hyblocker for their guide on converting Vive wands to trackers! https://gist.github.com/hyblocker/84193ed2ac35a82a1d2d1650dc4d6932 
 
 ## Donation page for poorness reasons
  [![ko-fi](https://ko-fi.com/img/githubbutton_sm.svg)](https://ko-fi.com/Q5Q6TOTSN)
